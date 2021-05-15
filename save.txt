@@ -1,0 +1,53 @@
+import conf
+import discord
+
+intense = discord.Intents.default()
+intense.members = True  
+
+client = discord.Client(intents=intense)
+
+@client.event
+async def on_message(message):
+    #<Message id=825338957113851934 channel=<TextChannel id=822806350886207542 name='флудильня' position=0 nsfw=False news=False category_id=822806350886207539> type=<MessageType.default: 0> author=<Member id=459312368321691660 name='Twinkle | J4F' discriminator='2408' bot=False nick=None guild=<Guild id=822806350886207538 name='Bots' shard_id=None chunked=False member_count=29>> flags=<MessageFlags value=0>>
+    if message.author == client.user:
+        return
+
+    if message.author.bot:
+        return
+
+    
+    
+    
+    if message.channel.id == 825345301560557608 :
+
+        msg = None
+
+        ctx = message.content.split(" ", maxsplit=1)
+
+        if message.content == "привет":
+            msg = f'Ку, {message.author.name}, меня зовут {client.user.name}, я - гачи интеллект. Зови меня просто Ван'
+    
+        if message.content == "1000-7":
+            msg = f'я гуль'
+    
+        if message.content == "я кто":
+            msg = f'Полагаю, что ты человек. Жалкий, но всё же человек. Тут написано что тебя зовут {message.author.name}, твой id - {message.author.id}'
+
+        if message.content == "давай шутку":
+            msg = f'Стоит как-то сталкер у третьего перекрестка и указатели читает «Направо — аномалии и ЧУТОК хабара. Вперед — монстров немерено и СРЕДНЕ хабара. Налево — кабаки, девки и хабара ДОФИГИЩА». Ну он подумал-подумал и вперед двинулся. Думает: — Чёта я про это слыхал… Да забыл блин. Надо будет на Баре у приятелей уточнить — че за ффигня такая?! "Кабаки и девки"?'
+
+        if ctx[0] == "скажи":
+            msg = ctx[1]
+
+        if message.content == "/get_members":
+            msg = ""  
+            if message.author.guild.name == "Bots":
+                for idx, member in list(enumerate(message.author.guild.members)):
+                    msg += f'{idx+1}. {member.name} { f"[{member.nick}]" if member.nick else ""} - {member.id}\n'
+
+        if message.content == "/get_channels":
+            
+
+        if message.content starts with == "/get"           
+
+client.run(conf.bot_token)      

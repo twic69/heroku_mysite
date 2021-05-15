@@ -1,0 +1,9 @@
+# Не сохранять
+conf.py
+__pycache__
+.vscode
+FFmpeg
+img/*
+
+# Исключения
+!vs_bg.jpg
