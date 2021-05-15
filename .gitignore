@@ -4,6 +4,7 @@ __pycache__
 .vscode
 FFmpeg
 img/*
+save.txt
 
 # Исключения
 !vs_bg.jpg
