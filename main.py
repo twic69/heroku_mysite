@@ -3,6 +3,7 @@ try:
 except ImportError:
     pass
 import discord
+from discord.errors import InvalidArgument
 from discord.ext import commands
 import img_handler as imhl
 import os, random
@@ -33,34 +34,34 @@ def allowed_channel():
     return
 
 @bot.command(name = "msg")
+@allowed_channel()
 async def command_qq(ctx, *args):
     global channel
     message = "".join(args)
-    if ctx.channel.id == channel:
-        msg = f'Сотрудник *[ДАННЫЕ УДАЛЕНЫ]* отправил сообщение в *[ДАННЫЕ УДАЛЕНЫ]*: ||{message}||'
-        await ctx.channel.send(msg)
+    msg = f'Сотрудник *[ДАННЫЕ УДАЛЕНЫ]* отправил сообщение в *[ДАННЫЕ УДАЛЕНЫ]*: ||{message}||'
+    await ctx.channel.send(msg)
 
 
 @bot.command(name = "about_me")
+@allowed_channel()
 async def command_members(ctx):
     global channel
-    if ctx.channel.id == channel:
-        msg = f'Получены данные о сотруднике **{ctx.author.name}**: ||ID Сотрудника: {ctx.author.id}||'
-        await ctx.channel.send(msg)
+    msg = f'Получены данные о сотруднике **{ctx.author.name}**: ||ID Сотрудника: {ctx.author.id}||'
+    await ctx.channel.send(msg)
 
 @bot.command(name = "repeat")
+@allowed_channel()
 async def command_repeat(ctx, *args):
     global channel
     message = "".join(args)
-    if ctx.channel.id == channel:
-        msg = f'{message}'
-        await ctx.channel.send(msg)
+    msg = f'{message}'
+    await ctx.channel.send(msg)
 
 @bot.command(name = "member")
 @allowed_channel()
 async def get_member(ctx, member:discord.Member=None):
     msg = None
-    global channel      
+    global channe      
     if member:
         msg = f'Получены данные о сотруднике {member.name}: ||{"({member.nick})" if member.nick else ""} ID Сотрудника: {member.id}||'
 
@@ -92,15 +93,15 @@ async def battle(ctx, f1:discord.Member=None, f2:discord.Member=None):
         await voice_client.play(discord.FFmpegPCMAudio(executable="./sound/ffmpeg.exe", source="./sound/mk.mp3"))
 
 @bot.command(name="mka")
+@allowed_channel()
 async def mka(ctx, f1:discord.Member=None, f2:discord.Member=None):
     global channel
-    if ctx.channel.id == channel:
-        if f1 and f2:
-            await imhl.vs_create_animated(f1.avatar_url, f2.avatar_url)
-            await ctx.channel.send( file=discord.File(os.path.join("./img/result.gif")))
-        elif f1:
-            await imhl.vs_create_animated(f1.avatar_url, bot.user.avatar_url)
-            await ctx.channel.send( file=discord.File(os.path.join("./img/result.gif")))
+    if f1 and f2:
+        await imhl.vs_create_animated(f1.avatar_url, f2.avatar_url)
+        await ctx.channel.send( file=discord.File(os.path.join("./img/result.gif")))
+    elif f1:
+        await imhl.vs_create_animated(f1.avatar_url, bot.user.avatar_url)
+        await ctx.channel.send( file=discord.File(os.path.join("./img/result.gif")))
             
 
 @bot.command(name="join")
@@ -117,32 +118,29 @@ async def vc_join(ctx):
         await voice_channel.connect()
 
 @bot.command(name="leave")
+@allowed_channel()
 async def vc_leave(ctx):
     msg = ""
     global channel
-    
-    if ctx.channel.id == channel:
-        voice_channel = ctx.author.voice.channel
-        print(voice_channel)
-        if voice_channel:
-            msg = f"Отключаюсь {voice_channel.name}"
-            await ctx.channel.send(msg)
-            await voice_channel.disconnect()
+    voice_channel = ctx.author.voice.channel
+    print(voice_channel)
+    if voice_channel:
+        msg = f"Отключаюсь {voice_channel.name}"
+        await ctx.channel.send(msg)
+        await voice_channel.disconnect()
 
 @bot.command(name="ost")
+@allowed_channel()
 async def vs_ost(ctx):
-    msg = ""
     global channel
-
-    if ctx.channel.id == channel:
-        voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-        msg = f"SALO"
-
-        await ctx.channel.send(msg)
-        await voice_client.play(discord.FFmpegPCMAudio(executable="./sound/ffmpeg.exe", source="./sound/mk.mp3"))
+    msg = ""
+    voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+    msg = f"SALO"
+    await ctx.channel.send(msg)
+    await voice_client.play(discord.FFmpegPCMAudio(executable="./sound/ffmpeg.exe", source="./sound/mk.mp3"))
 
 @bot.command(name="fight")
-allowed_channel()
+@allowed_channel()
 async def vs_random(ctx):
     msg = ""
     global channel
