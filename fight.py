@@ -1,38 +1,37 @@
 import random
 from time import sleep
+import asyncio, os
+import discord
+from discord.ext import commands
+from discord.member import Member
 
-f1_lvl, f2_lvl = random.randint(0,5), random.randint(0,5)
 
-f1_data = {
-    "member": {
-        "id": 643534534,
-        "name": "Kabal",
-    },
 
-    "specs": {
-        "lvl": f1_lvl,
-        "hp": 100 + f1_lvl*10,
-        "exp": 0,
-        "crt": 10 + f1_lvl*5,
-        "dmg": 0,
-    },
+#f2_data = {
+#    "member": {
+#        "id": 534534534534534,
+#        "name": "Goro",
+#    },
+#
+#    "specs": {
+#        "lvl":,
+#        "hp": 100,
+#        "exp": 0,
+#        "crt": 10,
+#        "dmg": 10,
+#    },
 
-}
+#}
 
-f2_data = {
-    "member": {
-        "id": 534534534534534,
-        "name": "Goro",
-    },
-
-    "specs": {
-        "lvl": f2_lvl,
-        "hp": 100 + f2_lvl*10,
-        "exp": 0,
-        "crt": 10 + f2_lvl*5,
-        "dmg": 0,
-    },
-
+attack_quets = {
+    "attack": [
+        "атакует",
+        "бьет",
+    ],
+    "finish": [
+        "добивает",
+        "шутит про мамку",
+    ],
 }
 
 class Fighter():
@@ -43,20 +42,37 @@ class Fighter():
         self._new_specs = specs
         self.can_fight = True   
 
-    def attack(self, target: "Fighter" = None):
+    async def attack(self, target: "Fighter" = None):
         spread = random.randint(0, self._specs["dmg"])
         crit = random.randint(1, 100)
+        new_embed = discord.Embed(
+            title = "Let the Battle Begins",
+            description = f"{self.__member['name']} {attack_quets['attack'][random.randint(0, len(attack_quets['attack']) -1 )]} {target.__member['name']}",
+            colour = discord.Colour.dark_blue(),
+        )
 
         if spread > 0:
+            new_embed.description += " и наносит"
             if crit > 20:
                 target._specs["hp"] -= self._specs["dmg"]
+                new_embed.description += f' {self._specs["dmg"]} урона'
             else:
-                target._specs["hp"] -= f1._specs["dmg"] + f1._specs["crt"]
+                target._specs["hp"] -= self._specs["dmg"] + self._specs["crt"]
+                new_embed.description += f' {self._specs["dmg"] + self._specs["crt"]} урона'
+
+        else:
+            new_embed.description += " и промахивается"
+
+        await self.__member["msg"].edit(embed = new_embed, file =discord.File(os.path.join("./img/result.png")))
 
         if target._specs["hp"] <= 0:
+            asyncio.sleep(2)
+            new_embed.description = f"{self.__member['name']} {attack_quets['finish'][random.randint(0, len(attack_quets['finish']) -1 )]} {target.__member['name']}!"
             target.can_fight = False
 
-    def win(self, target:"Fighter"=None):
+        
+
+    async def win(self, target:"Fighter"=None):
         diff = abs(self._specs["lvl"] - target._specs["lvl"])
 
         if diff < 4:
@@ -74,19 +90,14 @@ class Fighter():
         if self._specs["exp"] >= 100:
             self.__lvl_up()
 
-    def __lvl_up():
+    async def __lvl_up():
         pass 
 
-    def __str__(self):
+    async def __str__(self):
         return f"Параметры бойца {self.__member['name']}: {self._specs}"
 
-f1 = Fighter(f1_data["member"], f1_data["specs"])
-f2 = Fighter(f2_data["member"], f2_data["specs"])
 
-print(f1)
-print(f2)
-
-def fight(f1:Fighter=None, f2:Fighter=None):
+async def fight(f1:Fighter=None, f2:Fighter=None):
     
     turn = True
 
@@ -94,14 +105,54 @@ def fight(f1:Fighter=None, f2:Fighter=None):
         sleep(2)
         if turn:
             turn = False
-            f1.attack(f2)
+            await f1.attack(f2)
         else:
             turn = True
-            f2.attack(f1)
+            await f2.attack(f1)
     
     if f1.can_fight:
-        f1.win(f2)
-        print(f"{f1.name} HAS WON WITH {f1.hp}")
+        await f1.win(f2)
+        print(f"{f1.__member['name']} HAS WON WITH {f1.__member['hp']}")
     else:
-        f2.win(f1)
-        print(f"{f2.name} HAS WON WITH {f2.hp}")
+        await f2.win(f1)
+        print(f"{f2.__member['name']} HAS WON WITH {f2.__member['hp']}")
+
+async def create_fighters(f1:discord.Member, f2:discord.Member, message:discord.Message):
+    f1_data = {
+        "member": {
+            "id": f1.id,
+            "name": f1.display_name,
+            "msg": message
+        },
+
+        "specs": {
+            "lvl": f1.id,
+            "hp": 100 + f1.id*10,
+            "exp": 0,
+            "crt": 20 + f1.id*5,
+            "dmg": int(20 + f1.id*1.2),
+        },
+
+    }
+
+    f2_data = {
+        "member": {
+            "id": f2.id,
+            "name": f2.display_name,
+            "msg": message
+        },
+
+        "specs": {
+            "lvl": f2.id,
+            "hp": 100 + f2.id*10,
+            "exp": 0,
+            "crt": 20 + f2.id*5,
+            "dmg": int(20 + f2.id*1.2),
+        },
+
+    }
+
+    fighter1 = Fighter(f1_data["member"], f1_data["specs"])
+    fighter2 = Fighter(f1_data["member"], f1_data["specs"])
+
+    await fight(fighter1, fighter2)

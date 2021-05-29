@@ -8,6 +8,7 @@ from discord.ext import commands
 import img_handler as imhl
 import os, random
 from random import choice
+import fight
 
 intents = discord.Intents.default()
 intents.members = True
@@ -144,16 +145,32 @@ async def vs_ost(ctx):
 async def vs_random(ctx):
     msg = ""
     global channel
+    f1:discord.Member = None
+    f2:discord.Member = bot.user
     voice_channel = ctx.author.voice.channel
     if voice_channel:
-            f1 = ctx.author
-            f2 = choice(ctx.author.voice.channel.members)
-            await imhl.vs_create(f1.avatar_url, f2.avatar_url)    
-            await ctx.channel.send( file=discord.File(os.path.join("./img/result.png")))
-            msg = f"{f1.name} VS {f2.name}"
-            await ctx.channel.send(msg)            
-            await voice_channel.connect()
-            voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
-            await voice_client.play(discord.FFmpegPCMAudio(executable="./sound/ffmpeg.exe", source="./sound/mk.mp3"))
+        await vc_join(ctx)
+        voice_members = voice_channel.members   
+        voice_members = [member for member in voice_members if member.bot == False]
+        if len (voice_members) > 1:
+            f1, f2 = [voice_members.pop(random.randint(0, len(voice_members)-1)), voice_members.pop(random.randint(0, len(voice_members)-1))]
+
+        await imhl.vs_create(f1.avatar_url, f2.avatar_url)
+
+        embed = discord.Embed(
+            title = "Let the Battle Begins",
+            description = f"{f1.display_name} vs {f2.display.name}",
+            colour = discord.Colour.dark_blue(),
+        )
+        
+
+        message = await ctx.channel.send(embed = embed, file =discord.File(os.path.join("./img/result.png")))
+        
+        await fight.create_fighters(f1, f2, message)
+
+        voice_client = discord.utils.get(bot.voice_clients, guild=ctx.guild)
+        await voice_client.play(discord.FFmpegPCMAudio(executable="./sound/ffmpeg.exe", source="./sound/mk.mp3"))
+    else:
+        await ctx.channel.send("You aren't in the voice-channel mf")
 
 bot.run(conf.bot_token)
