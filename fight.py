@@ -63,11 +63,12 @@ class Fighter():
         else:
             new_embed.description += " и промахивается"
 
-        await self.__member["msg"].edit(embed = new_embed, file =discord.File(os.path.join("./img/result.png")))
+        await self.__member["msg"].edit(embed = new_embed)
 
         if target._specs["hp"] <= 0:
             asyncio.sleep(2)
             new_embed.description = f"{self.__member['name']} {attack_quets['finish'][random.randint(0, len(attack_quets['finish']) -1 )]} {target.__member['name']}!"
+            await self.__member["msg"].edit(embed = new_embed)
             target.can_fight = False
 
         
@@ -89,6 +90,16 @@ class Fighter():
                 self._specs["exp"] += 80
         if self._specs["exp"] >= 100:
             self.__lvl_up()
+        
+        new_embed = discord.Embed(
+            title = "Let the Battle Begins",
+            description = f"{self.__member['name']} HAS WON WITH {self.__member['hp']}" ,
+            colour = discord.Colour.dark_blue(),
+        )
+
+        await self.__member["msg"].edit(embed = new_embed, file =discord.File(os.path.join("./img/result.png")))
+
+
 
     async def __lvl_up():
         pass 
@@ -112,10 +123,8 @@ async def fight(f1:Fighter=None, f2:Fighter=None):
     
     if f1.can_fight:
         await f1.win(f2)
-        print(f"{f1.__member['name']} HAS WON WITH {f1.__member['hp']}")
     else:
         await f2.win(f1)
-        print(f"{f2.__member['name']} HAS WON WITH {f2.__member['hp']}")
 
 async def create_fighters(f1:discord.Member, f2:discord.Member, message:discord.Message):
     f1_data = {
